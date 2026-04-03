@@ -1,0 +1,27 @@
+server:
+  port: 9201
+spring:
+  application:
+    name: rock
+    version: 1.0.0
+
+  datasource:
+    url: jdbc:postgresql://localhost:35432/rock
+    username: ${DBUSER}
+    password: ${DBPASSWORD}
+    hikari:
+      schema: rock
+      minimum-idle: 5
+      maximum-pool-size: 20
+      register-mbeans: true
+      max-lifetime: 900000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    open-in-view: true
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db-changelog-master.xml
+    default-schema: rock
+

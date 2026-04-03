@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-5.0.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1773523061090-1" author="MKononovich">
+        <comment>Первоначальное создание базы данных.</comment>
+
+        <createTable schemaName="rock" tableName="dict_voices">
+            <column name="voices_type" type="text">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_dict_voices"/>
+            </column>
+            <column name="info" type="text"/>
+        </createTable>
+        <createTable schemaName="rock" tableName="dict_country">
+            <column name="name" type="text">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_dict_country"/>
+            </column>
+            <column name="full_name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="abr" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable schemaName="rock" tableName="dict_instruments">
+            <column name="name" type="text">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_dict_instruments"/>
+            </column>
+            <column name="type" type="text">
+                <constraints nullable="false" checkConstraint="CHECK (type in ('ACOUSTIC','ELECTRONIC'))"/>
+            </column>
+            <column name="is_hand" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable schemaName="rock" tableName="group_members">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_group_members"/>
+            </column>
+            <column name="group" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="member" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="main_instruments" type="text"/>
+            <column name="joined_year" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="separated_year" type="INT"/>
+        </createTable>
+        <createIndex tableName="group_members" indexName="group_members_group_member_idx" unique="true">
+            <column name="group">0</column>
+            <column name="member">1</column>
+        </createIndex>
+        <createIndex tableName="group_members" indexName="group_members_joined_year_idx">
+            <column name="joined_year">0</column>
+        </createIndex>
+        <createTable schemaName="rock" tableName="groups">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_groups"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_year" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dropped_year" type="INT"/>
+            <column name="styles" type="text[]"/>
+        </createTable>
+        <createIndex tableName="groups" indexName="groups_name_idx" unique="true">
+            <column name="name">0</column>
+        </createIndex>
+        <createTable schemaName="rock" tableName="musicians">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_musicians"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="family" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="born" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voices" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sex" type="text">
+                <constraints nullable="false" checkConstraint="CHECK (sex in ('MALE','FEMALE'))"/>
+            </column>
+        </createTable>
+        <createIndex tableName="musicians" indexName="musicians_names_idx" unique="true">
+            <column name="name">0</column>
+            <column name="family">1</column>
+            <column name="born">2</column>
+        </createIndex>
+        <createIndex tableName="musicians" indexName="musicians_born_idx">
+            <column name="born">0</column>
+        </createIndex>
+        <createIndex tableName="musicians" indexName="musicians_country_idx">
+            <column name="country">0</column>
+        </createIndex>
+        <createTable schemaName="rock" tableName="owns_instrument">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_owns_instrument"/>
+            </column>
+            <column name="man" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="instrument" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="group" baseTableName="group_members" baseTableSchemaName="rock"
+                                 constraintName="FK_GROUP_MEMBERS_ON_GROUP" referencedColumnNames="id"
+                                 referencedTableName="groups" referencedTableSchemaName="rock"/>
+        <addForeignKeyConstraint baseColumnNames="member" baseTableName="group_members" baseTableSchemaName="rock"
+                                 constraintName="FK_GROUP_MEMBERS_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="musicians" referencedTableSchemaName="rock"/>
+        <addForeignKeyConstraint baseColumnNames="country" baseTableName="musicians" baseTableSchemaName="rock"
+                                 constraintName="FK_MUSICIANS_ON_COUNTRY" referencedColumnNames="name"
+                                 referencedTableName="dict_country" referencedTableSchemaName="rock"/>
+        <addForeignKeyConstraint baseColumnNames="voices" baseTableName="musicians" baseTableSchemaName="rock"
+                                 constraintName="FK_MUSICIANS_ON_VOICES" referencedColumnNames="voices_type"
+                                 referencedTableName="dict_voices" referencedTableSchemaName="rock"/>
+        <addForeignKeyConstraint baseColumnNames="instrument" baseTableName="owns_instrument" baseTableSchemaName="rock"
+                                 constraintName="FK_OWNS_INSTRUMENT_ON_INSTRUMENT" referencedColumnNames="name"
+                                 referencedTableName="dict_instruments" referencedTableSchemaName="rock"/>
+        <addForeignKeyConstraint baseColumnNames="man" baseTableName="owns_instrument" baseTableSchemaName="rock"
+                                 constraintName="FK_OWNS_INSTRUMENT_ON_MAN" referencedColumnNames="id"
+                                 referencedTableName="musicians" referencedTableSchemaName="rock"/>
+        <addForeignKeyConstraint baseColumnNames="main_instruments" baseTableName="group_members" baseTableSchemaName="rock"
+                                 constraintName="FK_MAIN_INSTRUMENT_ON_INSTRUMENT" referencedColumnNames="name"
+                                 referencedTableName="dict_instruments" referencedTableSchemaName="rock"/>
+
+        <insert tableName="dict_country">
+            <column name="name">England</column>
+            <column name="full_name">Great Britania</column>
+            <column name="abr">GRP</column>
+        </insert>
+        <insert tableName="dict_country">
+            <column name="name">USA</column>
+            <column name="full_name">United State of America</column>
+            <column name="abr">USA</column>
+        </insert>
+        <insert tableName="dict_country">
+            <column name="name">Sweden</column>
+            <column name="full_name">Sweden</column>
+            <column name="abr">SWD</column>
+        </insert>
+        <insert tableName="dict_country">
+            <column name="name">Russia</column>
+            <column name="full_name">Russian Federation (former USSR)</column>
+            <column name="abr">RUS</column>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>
